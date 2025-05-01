@@ -1,6 +1,21 @@
 let tabs = [];
 let currentTabIndex = 0;
 
+// Save state to localStorage
+function saveState() {
+  localStorage.setItem('tabsData', JSON.stringify(tabs));
+  localStorage.setItem('currentTabIndex', currentTabIndex);
+}
+
+// Load state from localStorage
+function loadState() {
+  const savedTabs = localStorage.getItem('tabsData');
+  const savedIndex = localStorage.getItem('currentTabIndex');
+
+  if (savedTabs) tabs = JSON.parse(savedTabs);
+  if (savedIndex !== null) currentTabIndex = parseInt(savedIndex);
+}
+
 function createTab(title = "Untitled", nameList = []) {
   const tab = {
     title,
@@ -13,6 +28,7 @@ function createTab(title = "Untitled", nameList = []) {
 
   renderTabs();
   renderTabContent();
+  saveState();
 }
 
 function renderTabs() {
@@ -27,6 +43,7 @@ function renderTabs() {
       currentTabIndex = i;
       renderTabs();
       renderTabContent();
+      saveState();
     };
     button.oncontextmenu = (e) => {
       e.preventDefault();
@@ -66,10 +83,12 @@ function renderTabContent() {
 function updateTabTitle(newTitle) {
   tabs[currentTabIndex].title = newTitle;
   renderTabs();
+  saveState();
 }
 
 function updateName(index, newName) {
   tabs[currentTabIndex].list[index].name = newName;
+  saveState();
 }
 
 function getDateTime() {
@@ -86,6 +105,7 @@ function confirmCheck(checkbox, index) {
       entry.paid = !checkbox.checked;
       entry.timestamp = `[${entry.paid ? 'PAID' : 'UNPAID'}] ${getDateTime()}`;
       renderTabContent();
+      saveState();
     }
   }, 10);
 }
@@ -110,6 +130,7 @@ function saveNames() {
   tabs[currentTabIndex].list = names.map(name => ({ name, paid: false, timestamp: null }));
   toggleModal();
   renderTabContent();
+  saveState();
 }
 
 document.getElementById("editNames").onclick = toggleModal;
@@ -135,6 +156,7 @@ function renameTab() {
     tabs[currentTabIndex].title = newName;
     renderTabs();
     renderTabContent();
+    saveState();
   }
   hideTabMenu();
 }
@@ -148,28 +170,37 @@ function deleteTab() {
     }
     renderTabs();
     renderTabContent();
+    saveState();
   }
   hideTabMenu();
 }
 
 // ==== Init ====
 
-document.getElementById("addTab").onclick = () => createTab();
+document.getElementById("addTab").onclick = () => {
+  createTab("Untitled");
+};
 
 window.onload = () => {
-  createTab("Master List", [
-    "ABOGADO, RALPH LOUISE S.", "ARIOLA, ARIANA L.", "ATANANTE, IOANN R.",
-    "BERMAS, KEITH DEXTER P.", "BOTE, CLAIRE ANDREI S.", "BUENAFLOR, THOMAS NATHAN B.",
-    "BULAN, LYKA MAY P.", "CARINAN, CHARIZZE ANN B.", "CATALUÑA, JULIA CARMELLI A.",
-    "CIPCON, CZEDRIC ROMMEN J.", "CONSTANTE, CLYDE WILLIAM S.", "DELA TORRE, TANITHA B.",
-    "DE MESA, RIANNA RAE S.", "DEOCAREZA, SHANE NICOLE S.", "DIPAD, BENITO III B.",
-    "DY, JAN CARLO B.", "ESQUEJO, KRISHA D.", "FAJARDO, GRACE PAULINE E.",
-    "FELIAS, CAMILLE ANNE P.", "FLOR, ALLIAH MARIEL D.", "GALICIA, KRISHMER A.",
-    "GUERIÑA, MA. JANNELLE V.", "LOMEDA, JAIME JR S.", "MARISCOTES, CHARLENE L.",
-    "MENDIORO, JEZREEL KLEANNE B.", "MONTAÑEZ, PRINCESS RINA P.", "MORALES, MARIAN SAMANTHA S.",
-    "MORICO, CHRISTIAN JOSH E.", "NIETO, HANNAH LOIS B.", "OBAL, KAELA GABRIELLE R.",
-    "OPENARIA, ANNE MARGARET A.", "PAREJA, EUNICE GENOR C.", "RAMOS, JULIA JACINTH C.",
-    "REBEUNO, ERICH JOHN B.", "REMENTILLO, SAMANTHA D.", "REMOLACIO, CARRHEE JUSTHIN M.",
-    "RICO, EVA BEATRIZ H.", "TRILLANES, REMOS IVAN C.", "VOSOTROS, ZANDER B."
-  ]);
+  loadState();
+  if (tabs.length === 0) {
+    createTab("Master List", [
+      "ABOGADO, RALPH LOUISE S.", "ARIOLA, ARIANA L.", "ATANANTE, IOANN R.",
+      "BERMAS, KEITH DEXTER P.", "BOTE, CLAIRE ANDREI S.", "BUENAFLOR, THOMAS NATHAN B.",
+      "BULAN, LYKA MAY P.", "CARINAN, CHARIZZE ANN B.", "CATALUÑA, JULIA CARMELLI A.",
+      "CIPCON, CZEDRIC ROMMEN J.", "CONSTANTE, CLYDE WILLIAM S.", "DELA TORRE, TANITHA B.",
+      "DE MESA, RIANNA RAE S.", "DEOCAREZA, SHANE NICOLE S.", "DIPAD, BENITO III B.",
+      "DY, JAN CARLO B.", "ESQUEJO, KRISHA D.", "FAJARDO, GRACE PAULINE E.",
+      "FELIAS, CAMILLE ANNE P.", "FLOR, ALLIAH MARIEL D.", "GALICIA, KRISHMER A.",
+      "GUERIÑA, MA. JANNELLE V.", "LOMEDA, JAIME JR S.", "MARISCOTES, CHARLENE L.",
+      "MENDIORO, JEZREEL KLEANNE B.", "MONTAÑEZ, PRINCESS RINA P.", "MORALES, MARIAN SAMANTHA S.",
+      "MORICO, CHRISTIAN JOSH E.", "NIETO, HANNAH LOIS B.", "OBAL, KAELA GABRIELLE R.",
+      "OPENARIA, ANNE MARGARET A.", "PAREJA, EUNICE GENOR C.", "RAMOS, JULIA JACINTH C.",
+      "REBEUNO, ERICH JOHN B.", "REMENTILLO, SAMANTHA D.", "REMOLACIO, CARRHEE JUSTHIN M.",
+      "RICO, EVA BEATRIZ H.", "TRILLANES, REMOS IVAN C.", "VOSOTROS, ZANDER B."
+    ]);
+  } else {
+    renderTabs();
+    renderTabContent();
+  }
 };
