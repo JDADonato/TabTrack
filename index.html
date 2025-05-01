@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="controls">
+        <button id="editNames">✏️ Edit Names</button>
+        <button id="addTab">+ Add Tab</button>
+      </div>
+    </div>
+
+    <div id="tabContent"></div>
+
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="nameModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="toggleModal()">&times;</span>
+      <h3>Edit Names</h3>
+      <textarea id="bulkNames" placeholder="One name per line..."></textarea>
+      <div class="modal-actions">
+        <button onclick="saveNames()">Save</button>
+        <button onclick="toggleModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Menu -->
+  <div id="tabMenu" style="display:none;">
+    <button onclick="renameTab()">Rename</button>
+    <button onclick="deleteTab()">Delete</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
