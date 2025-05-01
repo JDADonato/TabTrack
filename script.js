@@ -1,17 +1,14 @@
 let tabs = [];
 let currentTabIndex = 0;
 
-// Save state to localStorage
+// Save/load state
 function saveState() {
   localStorage.setItem('tabsData', JSON.stringify(tabs));
   localStorage.setItem('currentTabIndex', currentTabIndex);
 }
-
-// Load state from localStorage
 function loadState() {
   const savedTabs = localStorage.getItem('tabsData');
   const savedIndex = localStorage.getItem('currentTabIndex');
-
   if (savedTabs) tabs = JSON.parse(savedTabs);
   if (savedIndex !== null) currentTabIndex = parseInt(savedIndex);
 }
@@ -21,11 +18,8 @@ function createTab(title = "Untitled", nameList = []) {
     title,
     list: nameList.map(name => ({ name, paid: false, timestamp: null }))
   };
-
-  const insertAt = currentTabIndex + 1;
-  tabs.splice(insertAt, 0, tab);
-  currentTabIndex = insertAt;
-
+  tabs.push(tab);
+  currentTabIndex = tabs.length - 1;
   renderTabs();
   renderTabContent();
   saveState();
@@ -34,12 +28,12 @@ function createTab(title = "Untitled", nameList = []) {
 function renderTabs() {
   const tabsDiv = document.getElementById("tabs");
   tabsDiv.innerHTML = '';
+
   tabs.forEach((tab, i) => {
     const button = document.createElement("button");
     button.textContent = tab.title;
     button.className = i === currentTabIndex ? 'active' : '';
     button.onclick = (e) => {
-      e.preventDefault();
       currentTabIndex = i;
       renderTabs();
       renderTabContent();
@@ -48,16 +42,22 @@ function renderTabs() {
     button.oncontextmenu = (e) => {
       e.preventDefault();
       currentTabIndex = i;
-      showTabMenu(e.pageX, e.pageY);
+      deleteTab(); // Only delete on right-click
     };
-    button.onmousedown = (e) => {
-      if (e.button === 0 && e.detail === 2) {
-        currentTabIndex = i;
-        showTabMenu(e.pageX, e.pageY);
-      }
+    button.ondblclick = (e) => {
+      e.preventDefault();
+      currentTabIndex = i;
+      renameTab(); // Rename on double click
     };
     tabsDiv.appendChild(button);
   });
+
+  // Add-tab button always at end
+  const addButton = document.createElement("button");
+  addButton.textContent = "+";
+  addButton.className = "add-tab";
+  addButton.onclick = () => createTab("Untitled");
+  tabsDiv.appendChild(addButton);
 }
 
 function renderTabContent() {
@@ -72,9 +72,13 @@ function renderTabContent() {
       <input type="checkbox" ${entry.paid ? 'checked' : ''} onclick="confirmCheck(this, ${idx})" />
     </li>
   `).join('');
+
   container.innerHTML = `
     <div class="checklist">
-      <input type="text" value="${tab.title}" onchange="updateTabTitle(this.value)" />
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <input type="text" value="${tab.title}" onchange="updateTabTitle(this.value)" />
+        <button class="dots-menu" onclick="toggleModal()">⋯</button>
+      </div>
       <ul>${checklistHTML}</ul>
     </div>
   `;
@@ -85,17 +89,14 @@ function updateTabTitle(newTitle) {
   renderTabs();
   saveState();
 }
-
 function updateName(index, newName) {
   tabs[currentTabIndex].list[index].name = newName;
   saveState();
 }
-
 function getDateTime() {
   const now = new Date();
   return now.toLocaleString();
 }
-
 function confirmCheck(checkbox, index) {
   checkbox.checked = !checkbox.checked;
   setTimeout(() => {
@@ -110,8 +111,7 @@ function confirmCheck(checkbox, index) {
   }, 10);
 }
 
-// ==== Modal for Editing Names ====
-
+// === Edit Modal ===
 function toggleModal() {
   const modal = document.getElementById("nameModal");
   const textarea = document.getElementById("bulkNames");
@@ -122,7 +122,6 @@ function toggleModal() {
     modal.style.display = "block";
   }
 }
-
 function saveNames() {
   const input = document.getElementById("bulkNames").value;
   const names = input.split('\n').map(n => n.trim()).filter(n => n);
@@ -133,23 +132,7 @@ function saveNames() {
   saveState();
 }
 
-document.getElementById("editNames").onclick = toggleModal;
-
-// ==== Tab Menu (Right Click / Double Click) ====
-
-function showTabMenu(x, y) {
-  const menu = document.getElementById("tabMenu");
-  menu.style.left = x + "px";
-  menu.style.top = y + "px";
-  menu.style.display = "block";
-  document.addEventListener("click", hideTabMenu);
-}
-
-function hideTabMenu() {
-  document.getElementById("tabMenu").style.display = "none";
-  document.removeEventListener("click", hideTabMenu);
-}
-
+// === Actions ===
 function renameTab() {
   const newName = prompt("Enter new name for the tab:", tabs[currentTabIndex].title);
   if (newName) {
@@ -158,29 +141,19 @@ function renameTab() {
     renderTabContent();
     saveState();
   }
-  hideTabMenu();
 }
-
 function deleteTab() {
   if (confirm(`Delete tab "${tabs[currentTabIndex].title}"?`)) {
     tabs.splice(currentTabIndex, 1);
     currentTabIndex = Math.max(0, currentTabIndex - 1);
-    if (tabs.length === 0) {
-      createTab("New List");
-    }
+    if (tabs.length === 0) createTab("New List");
     renderTabs();
     renderTabContent();
     saveState();
   }
-  hideTabMenu();
 }
 
-// ==== Init ====
-
-document.getElementById("addTab").onclick = () => {
-  createTab("Untitled");
-};
-
+// === Init ===
 window.onload = () => {
   loadState();
   if (tabs.length === 0) {
