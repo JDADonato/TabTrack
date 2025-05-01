@@ -5,7 +5,7 @@ body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  background: #f2f2f2;
+  background: #ffe4ec; /* pastel pink */
 }
 .container {
   max-width: 800px;
@@ -173,4 +173,30 @@ input.editable-name {
   .controls {
     flex-direction: column;
   }
+}
+
+.tabs button {
+  background: #f8cde6; /* soft pink tabs */
+  color: #333;
+}
+
+.tabs button.active {
+  background: #d291bc; /* pastel purple for active tab */
+  color: white;
+}
+
+.add-tab {
+  background: #ffd6e8;
+  font-weight: bold;
+}
+
+button.dots-menu {
+  background: transparent;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
+.modal-content {
+  background-color: #fff0f5; /* light pink modal */
 }
