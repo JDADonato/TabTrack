@@ -100,7 +100,7 @@ function confirmCheck(checkbox, index) {
   checkbox.checked = !checkbox.checked;
   setTimeout(() => {
     const entry = tabs[currentTabIndex].list[index];
-    const action = !checkbox.checked ? 'mark as UNPAID' : 'mark as PAID';
+    const action = !checkbox.checked ? 'mark as PAID' : 'mark as UNPAID';
     if (confirm(`Confirm to ${action} for "${entry.name}"?`)) {
       entry.paid = !checkbox.checked;
       entry.timestamp = `[${entry.paid ? 'PAID' : 'UNPAID'}] ${getDateTime()}`;
